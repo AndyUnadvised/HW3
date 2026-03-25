@@ -192,14 +192,6 @@ Node* createNode(int key)
     return newNode;
 }
 
-void selectRandomElements(int* sourceArray, int sourceSize, int* targetArray, int numElements) 
-{
-    for (int i = 0; i < numElements; i++)
-    {
-        int randomIndex = rand() % sourceSize;
-        targetArray[i] = sourceArray[randomIndex];
-    }
-}
 
 Node* insertRecursive(Node* root, int key) 
 {
