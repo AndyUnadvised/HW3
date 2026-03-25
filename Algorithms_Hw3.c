@@ -1,7 +1,7 @@
 /*
 * CSE 3318 - Homework 3
-* Name: [Your Name]
-* UTA ID: [Your ID]
+* Name: Mason Morales, Abril Hernandez
+* UTA ID: 1002210043, 1002191322
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,12 +45,10 @@ int main() {
  printf("--- Part 1: Generating Data ---\n");
  for (int i = 0; i < num_files; i++) {
  // TODO: generate data for each size and filename
- // Ensure the generated integers are UNIQUE and between 0 and
-20000
+ // Ensure the generated integers are UNIQUE and between 0 and 20000
  // Save the data in nodes<x>.txt file
  // Sort the data
- // Example of how to measure time (Use this pattern for all
-measurements)
+ // Example of how to measure time (Use this pattern for all measurements)
  start_time = clock();
  // TODO: Sort the array
  end_time = clock();
@@ -73,24 +71,19 @@ sizes[i], time_taken);
  // TODO: Measure time for Binary Search of the 10 elements
  // --- PART 3: Search and Insertion on Binary Search Tree ---
 
- // 1. Random BST (Insert keys in the exact order they appear
-in the file)
+ // 1. Random BST (Insert keys in the exact order they appear in the file)
  Node* randomBST = NULL;
- // TODO: Read from file again or use an unsorted copy of the
-array to insert elements
+ // TODO: Read from file again or use an unsorted copy of the array to insert elements
 
  // 2. Sorted BST (Insert keys from the sorted array)
  Node* sortedBST = NULL;
-// TODO: Measure time to Search for those 10 elements in BOTH
-trees
+// TODO: Measure time to Search for those 10 elements in BOTH trees
 // TODO: Insert elements from the sorted array into sortedBST
 
  // TODO: Generate 10 NEW random elements (between 0 and 20000)
 
- // TODO: Measure time for Iterative Insertion of these 10
-elements into BOTH trees
- // TODO: Measure time for Recursive Insertion of these 10
-elements into BOTH trees
+ // TODO: Measure time for Iterative Insertion of these 10 elements into BOTH trees
+ // TODO: Measure time for Recursive Insertion of these 10 elements into BOTH trees
 
  // Cleanup memory for this iteration
  // TODO: Free arrays
@@ -101,8 +94,8 @@ elements into BOTH trees
  return 0;
 }
 // -------------------------------------------------------------------
-----------
+
 // Function Implementations (Students to complete)
 // -------------------------------------------------------------------
-----------
+
 // TODO: Implement all the functions declared in the prototypes above.
