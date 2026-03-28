@@ -1,7 +1,7 @@
 /* 
  * CSE 3318 - Homework 3 
- * Name: [Mason Morales] 
- * UTA ID: [1002210043] 
+ * Name: [Mason Morales, Abril Hernandez 
+ * UTA ID: [1002210043, 1002] 
  */ 
  
 #include <stdio.h> 
@@ -18,7 +18,7 @@ typedef struct Node {
 
 
 // Part 1: Data Generation 
-void generateData(int size, const char* filename);
+void generateData(int num_files,int* sizes, const char** filename, const char** sfilenames);
 
 // Part 2: Array Operations 
 int* readDataToArray(const char* filename, int size); 
@@ -40,99 +40,143 @@ void selectRandomElements(int* sourceArray, int sourceSize, int* targetArray, in
 
 int main() 
 { 
-    // Seed the random number generator 
     srand(time(NULL)); 
-     
-    // Variables for timing 
-    clock_t start_time, end_time; 
-    double time_taken; 
- 
+    clock_t start, end;
     int sizes[] = {30, 1000, 6000, 10000}; 
     const char* filenames[] = {"nodes30.txt", "nodes1000.txt", "nodes6000.txt", "nodes10000.txt"}; 
     const char* sfilenames[] = {"snodes30.txt", "snodes1000.txt", "snodes6000.txt", "snodes10000.txt"}; 
     int num_files = 4;
 
-    generateData(num_files, sizes);
+    
+    generateData(num_files, sizes, filenames, sfilenames);
 
+    // PART 2 & 3 Loop
+    for (int i = 0; i < num_files; i++) {
+        printf("=== Processing Dataset Size: %d ===\n", sizes[i]);
+
+        // --- PART 2: Array Operations ---
+        int* sortedArr = readDataToArray(sfilenames[i], sizes[i]);
+        if (sortedArr == NULL) continue;
+        int targets[10];
+        //Select 10 random elements from the sorted array for searching
+        selectRandomElements(sortedArr, sizes[i], targets, 10);
+
+        // Linear Search Time
+        start = clock();
+        for(int j=0; j<10; j++) linearSearch(sortedArr, sizes[i], targets[j]);
+        end = clock();
+        printf("Linear Search (10 elements): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        // Binary Search Time
+        start = clock();
+        for(int j=0; j<10; j++) binarySearch(sortedArr, sizes[i], targets[j]);
+        end = clock();
+        printf("Binary Search (10 elements): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        // --- PART 3: BST Operations ---
+        int* unsortedArr = readDataToArray(filenames[i], sizes[i]);
+        Node* randomBST = NULL;
+        Node* sortedBST = NULL;
+
+        // Build Random BST
+        start = clock();
+        for(int j = 0; j < sizes[i]; j++) randomBST = insertIterative(randomBST, unsortedArr[j]);
+        end = clock();
+        printf("Tree Creation (Random): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        // Build Sorted BST (Degenerate)
+        start = clock();
+        for(int j = 0; j < sizes[i]; j++) sortedBST = insertIterative(sortedBST, sortedArr[j]);
+        end = clock();
+        printf("Tree Creation (Sorted): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+        
+        // Search Trees
+        start = clock();
+        for(int j=0; j<10; j++) searchBST(randomBST, targets[j]);
+        end = clock();
+        printf("Random BST Search: %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        start = clock();
+        for(int j=0; j<10; j++) searchBST(sortedBST, targets[j]);
+        end = clock();
+        printf("Sorted BST Search: %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        // New Random Insertions
+        int newKeys[10];
+        for(int j=0; j<10; j++) newKeys[j] = rand() % 20001;
+
+        start = clock();
+        for(int j=0; j<10; j++) randomBST = insertIterative(randomBST, newKeys[j]);
+        end = clock();
+        printf("Iterative Insertion Time: %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        // Cleanup
+        free(sortedArr);
+        free(unsortedArr);
+        freeTree(randomBST);
+        freeTree(sortedBST);
+        printf("\n");
+    }
+    return 0;
 }
 
 
-//Part 1: Data Generation   
-void generateData(int num_files, int* sizes) 
+// Part 1: Data Generation 
+void generateData(int num_files, int* sizes, const char** filenames, const char** sfilenames) 
 {
-
-   // PART 1: Generation of Data 
     printf("--- Part 1: Generating Data ---\n"); 
-    for (int i = 0; i < num_files; i++) { 
-        // TODO: generate data for each size and filename 
+    
+    int poolSize = 20001;
+    int* pool = (int*)malloc(poolSize * sizeof(int));
+    for (int i = 0; i < poolSize; i++) pool[i] = i;
 
-
-        // Ensure the generated integers are UNIQUE and between 0 and  20000 
-        FILE *file = fopen(filenames[i], "w");
-        for (int j = 0; j < sizes[i]; j++)
-        {
-            int num = rand() % 20001 ; // Random integer between 0 and 20000
-            fprintf(file, "%d\n", num);
+    for (int i = 0; i < num_files; i++) {
+        // Shuffle the pool for uniqueness
+        for (int j = poolSize - 1; j > 0; j--) {
+            int k = rand() % (j + 1);
+            int temp = pool[j]; pool[j] = pool[k]; pool[k] = temp;
         }
-        fclose(file);
 
+        // Write Unsorted
+        FILE *uFile = fopen(filenames[i], "w");
+        int* currentData = (int*)malloc(sizes[i] * sizeof(int));
+        for (int j = 0; j < sizes[i]; j++) {
+            currentData[j] = pool[j];
+            fprintf(uFile, "%d\n", currentData[j]);
+        }
+        fclose(uFile);
 
-        // Save the data in nodes<x>.txt file 
-        // Sort the data 
-        // Example of how to measure time (Use this pattern for all measurements) 
-        start_time = clock(); 
-        // TODO: Sort the array  
+        // Sort and Measure
+        clock_t start = clock();
+        sortArray(currentData, sizes[i]);
+        clock_t end = clock();
+        printf("Time to sort array of size %d: %f seconds\n", sizes[i], (double)(end - start) / CLOCKS_PER_SEC);
 
-        end_time = clock(); 
-        time_taken = ((double)(end_time - start_time)) / CLOCKS_PER_SEC; 
-        printf("Time to sort array of size %d: %f seconds\n", sizes[i], time_taken); 
- 
-         // Save the sorted data in snode<x>.txt file 
-    } 
-    printf("Data generation complete.\n\n"); 
- 
- 
-    // PART 2 & 3 Loop: Process each dataset size 
-    for (int i = 0; i < num_files; i++) { 
-        printf("=== Processing Dataset Size: %d ===\n", sizes[i]); 
- 
-        // --- PART 2: Search on Sorted Array --- 
-        // TODO: Read data from sfilenames[i] into an array 
-         
-        // TODO: Select 10 random elements from the array 
-         
-        // TODO: Measure time for Linear Search of the 10 elements 
-        // TODO: Measure time for Binary Search of the 10 elements 
- 
- 
-        // --- PART 3: Search and Insertion on Binary Search Tree --- 
-         
-        // 1. Random BST (Insert keys in the exact order they appear in the file) 
-        Node* randomBST = NULL; 
-        // TODO: Read from file again or use an unsorted copy of the array to insert elements 
-         
-        // 2. Sorted BST (Insert keys from the sorted array) 
-        Node* sortedBST = NULL; 
-  // TODO: Measure time to Search for those 10 elements in BOTH trees 
-// TODO: Insert elements from the sorted array into sortedBST 
-         
-        // TODO: Generate 10 NEW random elements (between 0 and 20000) 
-         
-        // TODO: Measure time for Iterative Insertion of these 10 elements into BOTH trees 
-        // TODO: Measure time for Recursive Insertion of these 10 elements into BOTH trees 
-         
- 
-// Cleanup memory for this iteration 
-// TODO: Free arrays 
-        free(arr); // Assuming arr is the array used for this iteration
-// TODO: Free BSTs (randomBST and sortedBST) using freeTree() 
-    freeTree(randomBST);
-    freeTree(sortedBST);
+        // Write Sorted
+        FILE *sFile = fopen(sfilenames[i], "w");
+        for (int j = 0; j < sizes[i]; j++) {
+            fprintf(sFile, "%d\n", currentData[j]);
+        }
+        fclose(sFile);
+        free(currentData);
+    }
+    free(pool);
+    printf("Data generation complete.\n\n");
+}
 
-printf("\n"); 
-} 
-    return 0; 
-} 
+int* readDataToArray(const char* filename, int size){
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        printf("Error opening file %s\n", filename);
+        return NULL;
+    }
+    int* arr = (int*)malloc(size * sizeof(int));
+    for (int i = 0; i < size; i++) {
+        fscanf(file, "%d", &arr[i]);
+    }
+    fclose(file);
+    return arr;
+}
 
 int comp(const void *a, const void *b) 
 {
