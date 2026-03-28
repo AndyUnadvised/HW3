@@ -106,9 +106,23 @@ int main()
         for(int j=0; j<10; j++) newKeys[j] = rand() % 20001;
 
         start = clock();
-        for(int j=0; j<10; j++) randomBST = insertIterative(randomBST, newKeys[j]);
+        for(int j=0; j<10; j++) {
+            randomBST = insertIterative(randomBST, newKeys[j]);
+            sortedBST = insertIterative(sortedBST, newKeys[j]);
+        }
         end = clock();
-        printf("Iterative Insertion Time: %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+        printf("Iterative Insertion Time (Both Trees): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+        int recKeys[10];
+        for(int j=0; j<10; j++) recKeys[j] = rand() % 20001;
+
+        start = clock();
+        for(int j=0; j<10; j++) {
+            randomBST = insertRecursive(randomBST, recKeys[j]);
+            sortedBST = insertRecursive(sortedBST, recKeys[j]);
+        }
+        end = clock();
+        printf("Recursive Insertion (Both): %f sec\n", (double)(end - start) / CLOCKS_PER_SEC);
 
         // Cleanup
         free(sortedArr);
